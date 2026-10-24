@@ -9,6 +9,7 @@ metricas.yaml                     definição das métricas e domínios
 scripts/extrair_metricas.py       baixa as métricas da API de agregados do IBGE
 scripts/normalizar_metricas.py    normaliza por tipo e checa redundância
 scripts/treinar_dominios.py       agrupa cada domínio e escolhe k pelo Davies-Bouldin
+scripts/app_agrupamentos.py       app Streamlit para visualizar e comparar os agrupamentos
 scripts/catalogo_metadados_censo2022.py   catálogo de metadados das tabelas do Censo (apoio à escolha)
 repositorios/                     dados gerados (fora do git)
 ```
@@ -20,6 +21,7 @@ pip install -r requirements.txt
 python scripts/extrair_metricas.py      # -> repositorios/metricas_municipais.csv
 python scripts/normalizar_metricas.py   # -> repositorios/metricas_normalizadas.csv
 python scripts/treinar_dominios.py      # -> repositorios/modelos/kmeans/
+streamlit run scripts/app_agrupamentos.py
 ```
 
 As respostas da API ficam em cache (`repositorios/api_cache/`), então rodar de novo é instantâneo.
@@ -57,3 +59,10 @@ Saídas em `repositorios/modelos/{algoritmo}/`:
 Algoritmos: K-means (`--algoritmo kmeans`). Os demais (Hierárquico, GMM, SOM) entram no registro `ALGORITMOS` do script.
 
 **Atenção:** o Davies-Bouldin tende a isolar municípios extremos em clusters minúsculos, como os com presídio em D1 e os de maioria indígena ou quilombola em D2. Antes de interpretar os grupos, confira a coluna `menor_cluster` em `avaliacao.csv`.
+
+## Visualização
+
+`app_agrupamentos.py` (Streamlit) lê os resultados de qualquer algoritmo treinado e tem três abas:
+- **Domínio:** mapa dos clusters (malha municipal do IBGE, baixada na primeira execução), tamanhos, curva de validação por k e perfil dos clusters (cor = média padronizada, número = média original).
+- **Comparação entre domínios:** matriz de concordância entre domínios (NMI ou ARI; 0 = partições independentes, 1 = idênticas) e, para um par, tabela de contingência e Sankey mostrando como os grupos de um domínio se distribuem nos do outro.
+- **Município:** o cluster de um município em cada domínio, com os valores das suas métricas.

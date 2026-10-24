@@ -1,5 +1,7 @@
 numpy
 pandas
+plotly
 pyyaml
 requests
 scikit-learn
+streamlit
