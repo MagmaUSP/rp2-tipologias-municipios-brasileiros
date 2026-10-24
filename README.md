@@ -8,6 +8,7 @@ Agrupamento dos 5.570 municípios brasileiros a partir do Censo IBGE 2022, compa
 metricas.yaml                     definição das métricas e domínios
 scripts/extrair_metricas.py       baixa as métricas da API de agregados do IBGE
 scripts/normalizar_metricas.py    normaliza por tipo e checa redundância
+scripts/treinar_dominios.py       agrupa cada domínio e escolhe k pelo Davies-Bouldin
 scripts/catalogo_metadados_censo2022.py   catálogo de metadados das tabelas do Censo (apoio à escolha)
 repositorios/                     dados gerados (fora do git)
 ```
@@ -16,11 +17,12 @@ repositorios/                     dados gerados (fora do git)
 
 ```bash
 pip install -r requirements.txt
-python scripts/extrair_metricas.py      # -> repositorios/censo_2022/metricas_municipais.csv
-python scripts/normalizar_metricas.py   # -> repositorios/censo_2022/metricas_normalizadas.csv
+python scripts/extrair_metricas.py      # -> repositorios/metricas_municipais.csv
+python scripts/normalizar_metricas.py   # -> repositorios/metricas_normalizadas.csv
+python scripts/treinar_dominios.py      # -> repositorios/modelos/kmeans/
 ```
 
-As respostas da API ficam em cache (`repositorios/censo_2022/api_cache/`), então rodar de novo é instantâneo.
+As respostas da API ficam em cache (`repositorios/api_cache/`), então rodar de novo é instantâneo.
 
 ## Métricas
 
@@ -41,3 +43,17 @@ Critérios desta primeira versão:
 | D5 Educação | alfabetização 15+, anos de estudo 25+, superior completo 25+, frequência escolar 0–3 e 15–17 anos |
 | D6 Trabalho e renda | nível de ocupação, desocupação, informalidade, % agropecuária, renda per capita mediana |
 | D7 Mobilidade | trabalha em outro município, deslocamento acima de 1 h, transporte coletivo, automóvel |
+
+## Treino
+
+`treinar_dominios.py` agrupa cada domínio separadamente, usando só as métricas daquele domínio. Para cada k do intervalo (padrão: 3 a 10), o script ajusta o modelo e calcula Davies-Bouldin, silhueta e Calinski-Harabasz. O k final é o de **menor Davies-Bouldin**.
+
+Saídas em `repositorios/modelos/{algoritmo}/`:
+- `avaliacao.csv`: todos os k testados, com as três métricas e o tamanho do menor cluster;
+- `rotulos.csv`: o cluster de cada município em cada domínio;
+- `perfis.csv`: média das métricas originais por cluster, para interpretar os grupos;
+- `{dominio}.joblib`: o modelo final de cada domínio.
+
+Algoritmos: K-means (`--algoritmo kmeans`). Os demais (Hierárquico, GMM, SOM) entram no registro `ALGORITMOS` do script.
+
+**Atenção:** o Davies-Bouldin tende a isolar municípios extremos em clusters minúsculos, como os com presídio em D1 e os de maioria indígena ou quilombola em D2. Antes de interpretar os grupos, confira a coluna `menor_cluster` em `avaliacao.csv`.

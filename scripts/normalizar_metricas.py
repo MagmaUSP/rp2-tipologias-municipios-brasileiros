@@ -11,7 +11,7 @@ Valores vazios continuam vazios (a imputação, se houver, fica para a etapa de 
 Uso
   python scripts/normalizar_metricas.py
 
-Saídas (em repositorios/censo_2022/)
+Saídas (em repositorios/)
   metricas_normalizadas.csv   mesmas linhas e colunas, com valores normalizados
   Na tela: faltantes por métrica e pares com |correlação de Spearman| > 0,9
            dentro de um mesmo domínio (cada domínio é modelado separadamente,
@@ -27,7 +27,7 @@ import pandas as pd
 import yaml
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DADOS = os.path.join(RAIZ, "repositorios", "censo_2022")
+DADOS = os.path.join(RAIZ, "repositorios")
 SPEC = os.path.join(RAIZ, "metricas.yaml")
 LIMIAR_CORRELACAO = 0.9
 

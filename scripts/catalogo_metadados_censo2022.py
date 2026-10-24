@@ -15,11 +15,11 @@ Como as tabelas do SIDRA se organizam
   2, 3... = subcategorias que se somam na categoria do nível acima.
 
 Uso
-  python scripts/catalogo_metadados_censo2022.py         (lê repositorios/censo_2022/tabelas_agregadas.csv)
+  python scripts/catalogo_metadados_censo2022.py         (lê repositorios/tabelas_agregadas.csv)
   python scripts/catalogo_metadados_censo2022.py --tabelas 9514 6805
   python scripts/catalogo_metadados_censo2022.py --lista outra_lista.csv
 
-Saídas (em repositorios/censo_2022/catalogo/; mude com --pasta)
+Saídas (em repositorios/catalogo/; mude com --pasta)
   tabelas.csv          1 linha por tabela: nome, assunto, períodos, níveis territoriais,
                        nº de variáveis, classificações e combinações (tamanho do cubo)
   variaveis.csv        1 linha por tabela × variável: código, nome, unidade
@@ -50,7 +50,7 @@ SESSAO.headers.update({"User-Agent": "pesquisa-academica-censo2022"})
 
 # scripts/ e repositorios/ ficam lado a lado na raiz do projeto
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DADOS = os.path.join(RAIZ, "repositorios", "censo_2022")
+DADOS = os.path.join(RAIZ, "repositorios")
 
 
 def baixar_metadados(tabela, pasta_cache):

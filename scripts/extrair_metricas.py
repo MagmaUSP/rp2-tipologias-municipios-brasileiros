@@ -16,7 +16,7 @@ Uso
   python scripts/extrair_metricas.py --metricas D1_1 D3_4
   python scripts/extrair_metricas.py --spec outra_spec.yaml --saida outra_saida.csv
 
-Saídas (em repositorios/censo_2022/)
+Saídas (em repositorios/)
   metricas_municipais.csv   cod_ibge, municipio, uf + 1 coluna por métrica
   api_cache/                resposta bruta de cada chamada (cache: não é baixada de novo)
 
@@ -42,7 +42,7 @@ SESSAO.headers.update({"User-Agent": "pesquisa-academica-censo2022"})
 
 # scripts/ e repositorios/ ficam lado a lado na raiz do projeto
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DADOS = os.path.join(RAIZ, "repositorios", "censo_2022")
+DADOS = os.path.join(RAIZ, "repositorios")
 SPEC = os.path.join(RAIZ, "metricas.yaml")
 
 
