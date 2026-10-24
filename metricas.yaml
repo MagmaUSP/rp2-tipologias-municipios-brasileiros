@@ -1,0 +1,387 @@
+# Métricas municipais do Censo 2022 (nível N6), extraídas da API de agregados do IBGE:
+#   https://servicodados.ibge.gov.br/api/v3/agregados/{tabela}/periodos/{periodo}/variaveis/{variavel}
+#     ?localidades=N6[all]&classificacao={classificacao}[{categorias}]|{filtro}
+#
+# Campos de cada métrica
+#   descricao          o que a métrica mede
+#   dominio            chave em `dominios`; cada domínio é modelado separadamente
+#   tabela, variavel   códigos do SIDRA
+#   tipo               normalização: P = percentual/taxa (0-100) | L = cauda longa (log) | Z = anos, razão, média
+#   filtro             {classificação: categoria} fixadas; classificações omitidas valem "Total"
+#                      (exceção: algumas tabelas, como a 10127, exigem o Total explícito)
+#   classificacao      classificação usada na razão
+#   numerador          categorias somadas no numerador
+#   denominador        categorias somadas no denominador (normalmente o Total da classificação)
+# Sem numerador/denominador a métrica é "direta": o valor publicado da variável.
+# Métricas de razão saem em % (numerador / denominador * 100).
+
+periodo: 2022
+
+dominios:
+  D1:
+    nome: Estrutura etária e população
+    descricao: Idade, sexo, crescimento, densidade e urbanização da população.
+  D2:
+    nome: Composição étnico-racial
+    descricao: Composição por cor ou raça e presença de povos tradicionais.
+  D3:
+    nome: Saúde e saneamento
+    descricao: Indicadores diretos de saúde e seus determinantes sanitários (o Censo não mede morbidade).
+  D4:
+    nome: Moradia
+    descricao: Tipo, posse e adensamento do domicílio e acesso a bens e serviços.
+  D5:
+    nome: Educação
+    descricao: Alfabetização, escolaridade adulta e frequência escolar.
+  D6:
+    nome: Trabalho e renda
+    descricao: Inserção no mercado de trabalho, informalidade, estrutura produtiva e renda.
+  D7:
+    nome: Mobilidade
+    descricao: Deslocamento casa-trabalho, com pendularidade, tempo e meio de transporte.
+
+metricas:
+
+  # ---------------------------------------------------------------- D1
+  - codigo: D1_1
+    nome: Idade mediana
+    descricao: Idade que divide a população ao meio; síntese do envelhecimento.
+    dominio: D1
+    tipo: Z
+    tabela: 9515
+    variavel: 10613
+
+  - codigo: D1_3
+    nome: Razão de sexo
+    descricao: Homens por 100 mulheres; capta migração seletiva e sobremortalidade masculina.
+    dominio: D1
+    tipo: Z
+    tabela: 9515
+    variavel: 8845
+
+  - codigo: D1_4
+    nome: Taxa de crescimento geométrico 2010-2022
+    descricao: Crescimento médio anual da população entre os Censos 2010 e 2022 (% a.a.).
+    dominio: D1
+    tipo: Z
+    tabela: 4709
+    variavel: 10605
+
+  - codigo: D1_5
+    nome: Densidade demográfica
+    descricao: Habitantes por km²; intensidade de ocupação do território.
+    dominio: D1
+    tipo: L
+    tabela: 4714
+    variavel: 614
+
+  - codigo: D1_6
+    nome: "% população urbana"
+    descricao: Parcela da população residente em situação urbana.
+    dominio: D1
+    tipo: P
+    tabela: 9923
+    variavel: 93                # População residente
+    classificacao: 1            # Situação do domicílio
+    numerador: [1]              # Urbana
+    denominador: [6795]         # Total
+
+  - codigo: D1_7
+    nome: Média de moradores por domicílio
+    descricao: Moradores por domicílio particular permanente ocupado.
+    dominio: D1
+    tipo: Z
+    tabela: 4712
+    variavel: 5930
+
+  # ---------------------------------------------------------------- D2
+  - codigo: D2_2
+    nome: "% Preta + Parda"
+    descricao: Parcela da população autodeclarada preta ou parda (população negra).
+    dominio: D2
+    tipo: P
+    tabela: 9605
+    variavel: 93
+    classificacao: 86
+    numerador: [2777, 2779]     # Preta, Parda
+    denominador: [95251]
+
+  - codigo: D2_3
+    nome: "% Indígena"
+    descricao: Parcela da população autodeclarada indígena no quesito cor ou raça.
+    dominio: D2
+    tipo: P
+    tabela: 9605
+    variavel: 93
+    classificacao: 86
+    numerador: [2780]           # Indígena
+    denominador: [95251]
+
+  - codigo: D2_4
+    nome: "% quilombola"
+    descricao: Parcela da população que se declara quilombola.
+    dominio: D2
+    tipo: P
+    tabela: 9578
+    variavel: 4728              # Percentual de pessoas quilombolas (Localização = Total)
+
+  # ---------------------------------------------------------------- D3
+  - codigo: D3_1
+    nome: "% pessoas com deficiência (2+ anos)"
+    descricao: Pessoas de 2 anos ou mais com deficiência (dificuldade funcional severa).
+    dominio: D3
+    tipo: P
+    tabela: 10127
+    variavel: 13403
+    filtro: {1509: 58771}       # Tipos de dificuldades funcionais = Total (nesta tabela não vem por padrão)
+
+  - codigo: D3_2
+    nome: "% crianças até 5 anos com registro em cartório"
+    descricao: Crianças até 5 anos com registro em cartório; proxy de acesso a serviços básicos.
+    dominio: D3
+    tipo: P
+    tabela: 9872
+    variavel: 13085
+
+  - codigo: D3_3
+    nome: "% domicílios ligados à rede geral de água (uso principal)"
+    descricao: Domicílios abastecidos principalmente pela rede geral de água.
+    dominio: D3
+    tipo: P
+    tabela: 6803
+    variavel: 381               # Domicílios particulares permanentes ocupados
+    classificacao: 1821
+    numerador: [72144]          # Possui ligação à rede geral e a utiliza como forma principal
+    denominador: [72129]        # Total
+
+  - codigo: D3_4
+    nome: "% domicílios com esgoto por rede geral ou pluvial"
+    descricao: Domicílios com esgoto na rede geral ou pluvial (inclui fossa ligada à rede).
+    dominio: D3
+    tipo: P
+    tabela: 6805
+    variavel: 381
+    classificacao: 11558        # Tipo de esgotamento sanitário
+    numerador: [46290]          # Rede geral, rede pluvial ou fossa ligada à rede
+    denominador: [46292]        # Total
+
+  - codigo: D3_5
+    nome: "% domicílios sem banheiro nem sanitário"
+    descricao: Domicílios sem banheiro nem sanitário; privação sanitária extrema.
+    dominio: D3
+    tipo: P
+    tabela: 6805
+    variavel: 381
+    classificacao: 11558
+    numerador: [92861]          # Não tinham banheiro nem sanitário
+    denominador: [46292]
+
+  - codigo: D3_6
+    nome: "% domicílios com lixo coletado"
+    descricao: Domicílios com lixo coletado por serviço de limpeza (porta ou caçamba).
+    dominio: D3
+    tipo: P
+    tabela: 6892
+    variavel: 381
+    classificacao: 67           # Destino do lixo
+    numerador: [2520]           # Coletado
+    denominador: [10972]        # Total
+
+  # ---------------------------------------------------------------- D4
+  - codigo: D4_1
+    nome: "% apartamentos"
+    descricao: Domicílios do tipo apartamento; verticalização.
+    dominio: D4
+    tipo: P
+    tabela: 9928
+    variavel: 381
+    classificacao: 125          # Tipo de domicílio
+    numerador: [3247]           # Apartamento
+    denominador: [2932]         # Total
+
+  - codigo: D4_2
+    nome: "% domicílios alugados"
+    descricao: Domicílios alugados; dinâmica do mercado imobiliário.
+    dominio: D4
+    tipo: P
+    tabela: 9928
+    variavel: 381
+    classificacao: 63           # Condição de ocupação do domicílio
+    numerador: [1055]           # Alugado
+    denominador: [95826]        # Total
+
+  - codigo: D4_3
+    nome: "% domicílios com mais de 2 moradores por dormitório"
+    descricao: Domicílios com mais de 2 moradores por dormitório; adensamento excessivo.
+    dominio: D4
+    tipo: P
+    tabela: 9933
+    variavel: 381
+    classificacao: 1975         # Número de moradores por cômodos utilizados como dormitório
+    numerador: [73089, 73090]   # Mais de 2 até 3; Mais de 3
+    denominador: [73086]        # Total
+
+  - codigo: D4_4
+    nome: "% domicílios com internet"
+    descricao: Domicílios com conexão à internet.
+    dominio: D4
+    tipo: P
+    tabela: 9936
+    variavel: 381
+    classificacao: 2072         # Existência de conexão domiciliar à Internet
+    numerador: [77585]          # Sim
+    denominador: [77584]        # Total
+
+  - codigo: D4_5
+    nome: "% domicílios com máquina de lavar"
+    descricao: Domicílios com máquina de lavar roupas; padrão de consumo.
+    dominio: D4
+    tipo: P
+    tabela: 9935
+    variavel: 381
+    classificacao: 1977         # Presença de máquina de lavar roupas
+    numerador: [73092]          # Sim
+    denominador: [73091]        # Total
+
+  # ---------------------------------------------------------------- D5
+  - codigo: D5_1
+    nome: Taxa de alfabetização 15+
+    descricao: Pessoas de 15 anos ou mais que sabem ler e escrever.
+    dominio: D5
+    tipo: P
+    tabela: 9543
+    variavel: 2513
+
+  - codigo: D5_2
+    nome: Anos médios de estudo (25+)
+    descricao: Média de anos de estudo das pessoas de 25 anos ou mais.
+    dominio: D5
+    tipo: Z
+    tabela: 10062
+    variavel: 13285
+    filtro: {58: 108866}        # Grupo de idade = 25 anos ou mais
+
+  - codigo: D5_3
+    nome: "% 25+ com superior completo"
+    descricao: Pessoas de 25 anos ou mais com ensino superior completo.
+    dominio: D5
+    tipo: P
+    tabela: 10061
+    variavel: 2667              # Pessoas de 18 anos ou mais
+    filtro: {58: 108866}        # Grupo de idade = 25 anos ou mais
+    classificacao: 1568         # Nível de instrução
+    numerador: [99713]          # Superior completo
+    denominador: [120704]       # Total
+
+  - codigo: D5_4
+    nome: Frequência escolar bruta 0-3 anos
+    descricao: Crianças de 0 a 3 anos que frequentam creche ou escola.
+    dominio: D5
+    tipo: P
+    tabela: 10056
+    variavel: 3795
+    filtro: {58: 99749}         # Grupo de idade = 0 a 3 anos
+
+  - codigo: D5_5
+    nome: Frequência escolar bruta 15-17 anos
+    descricao: Jovens de 15 a 17 anos que frequentam escola.
+    dominio: D5
+    tipo: P
+    tabela: 10056
+    variavel: 3795
+    filtro: {58: 2792}          # Grupo de idade = 15 a 17 anos
+
+  # ---------------------------------------------------------------- D6
+  - codigo: D6_1
+    nome: Nível de ocupação (10+)
+    descricao: Ocupados entre as pessoas de 10 anos ou mais.
+    dominio: D6
+    tipo: P
+    tabela: 10268
+    variavel: 675
+
+  - codigo: D6_2
+    nome: "% desocupados na força de trabalho"
+    descricao: "Taxa de desocupação: desocupados / força de trabalho (14 anos ou mais)."
+    dominio: D6
+    tipo: P
+    tabela: 6580
+    variavel: 1641              # Pessoas de 14 anos ou mais
+    classificacao: 629          # Condição em relação à força de trabalho
+    numerador: [32446]          # Força de trabalho - desocupada
+    denominador: [32386]        # Força de trabalho
+
+  - codigo: D6_3
+    nome: "% ocupados não contribuintes à previdência"
+    descricao: Ocupados que não contribuem para a previdência; proxy de informalidade.
+    dominio: D6
+    tipo: P
+    tabela: 10264
+    variavel: 4090              # Pessoas de 14+ ocupadas
+    classificacao: 526          # Contribuição para previdência oficial
+    numerador: [15351]          # Não contribuintes
+    denominador: [15349]        # Total
+
+  - codigo: D6_4
+    nome: "% ocupados na agropecuária"
+    descricao: Ocupados em agricultura, pecuária, produção florestal, pesca e aquicultura.
+    dominio: D6
+    tipo: P
+    tabela: 10262
+    variavel: 4090
+    classificacao: 11805        # Seção de atividade do trabalho principal
+    numerador: [12640]          # Agricultura, pecuária, produção florestal, pesca e aquicultura
+    denominador: [95371]        # Total
+
+  - codigo: D6_5
+    nome: Rendimento domiciliar per capita mediano (R$)
+    descricao: Mediana do rendimento nominal mensal domiciliar per capita.
+    dominio: D6
+    tipo: L
+    tabela: 10295
+    variavel: 13534
+
+  # ---------------------------------------------------------------- D7
+  - codigo: D7_1
+    nome: "% ocupados que trabalham em outro município"
+    descricao: Ocupados que trabalham em outro município; integração pendular.
+    dominio: D7
+    tipo: P
+    tabela: 10329
+    variavel: 13373
+    classificacao: 469          # Local de exercício do trabalho principal
+    numerador: [12188]          # Outro município
+    denominador: [79176]        # Total
+
+  - codigo: D7_2
+    nome: "% com deslocamento casa-trabalho acima de 1 hora"
+    descricao: Ocupados com deslocamento habitual casa-trabalho acima de 1 hora.
+    dominio: D7
+    tipo: P
+    tabela: 10330
+    variavel: 13376
+    classificacao: 537          # Tempo habitual de deslocamento
+    numerador: [19432, 79191, 79192]  # 1-2 h; 2-4 h; mais de 4 h
+    denominador: [31609]        # Total
+
+  - codigo: D7_3
+    nome: "% que vão ao trabalho de transporte coletivo"
+    descricao: Ocupados que vão ao trabalho de ônibus, BRT, trem/metrô ou van.
+    dominio: D7
+    tipo: P
+    tabela: 10330
+    variavel: 13376
+    classificacao: 2088         # Meio de transporte
+    numerador: [79207, 79208, 79209, 79210]  # Van; Ônibus; BRT; Trem ou metrô
+    denominador: [79488]        # Total
+
+  - codigo: D7_4
+    nome: "% que vão ao trabalho de automóvel"
+    descricao: Ocupados que vão ao trabalho de automóvel.
+    dominio: D7
+    tipo: P
+    tabela: 10330
+    variavel: 13376
+    classificacao: 2088
+    numerador: [79197]          # Automóvel
+    denominador: [79488]

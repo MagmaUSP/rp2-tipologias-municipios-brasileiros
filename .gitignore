@@ -1,0 +1,18 @@
+# dados gerados pelos scripts (reproduzíveis a partir da API do IBGE)
+repositorios/
+
+# documentos de trabalho
+planos/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# editores e SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,1 +1,43 @@
+# Tipologias dos municípios brasileiros
 
+Agrupamento dos 5.570 municípios brasileiros a partir do Censo IBGE 2022, comparando K-means, Agrupamento Hierárquico, GMM e SOM (validados com o índice de Davies-Bouldin e interpretados com SHAP).
+
+## Estrutura
+
+```
+metricas.yaml                     definição das métricas e domínios
+scripts/extrair_metricas.py       baixa as métricas da API de agregados do IBGE
+scripts/normalizar_metricas.py    normaliza por tipo e checa redundância
+scripts/catalogo_metadados_censo2022.py   catálogo de metadados das tabelas do Censo (apoio à escolha)
+repositorios/                     dados gerados (fora do git)
+```
+
+## Uso
+
+```bash
+pip install -r requirements.txt
+python scripts/extrair_metricas.py      # -> repositorios/censo_2022/metricas_municipais.csv
+python scripts/normalizar_metricas.py   # -> repositorios/censo_2022/metricas_normalizadas.csv
+```
+
+As respostas da API ficam em cache (`repositorios/censo_2022/api_cache/`), então rodar de novo é instantâneo.
+
+## Métricas
+
+Cada métrica de [metricas.yaml](metricas.yaml) aponta diretamente para uma tabela, uma variável e categorias do SIDRA. Para incluir ou alterar uma métrica, basta editar o YAML; os scripts não precisam mudar.
+
+Critérios desta primeira versão:
+- **Simplicidade:** cada métrica vem de uma única tabela, como valor publicado (taxa, mediana) ou como razão categoria ÷ total. Fecundidade, mortalidade, migração e outros indicadores que exigem cálculo demográfico ficam para uma etapa posterior.
+- **Comparabilidade:** só taxas, proporções e medidas de posição, nunca contagens absolutas.
+- **Domínios independentes:** cada domínio é modelado separadamente. A redundância (|Spearman| > 0,9) só é checada dentro do mesmo domínio; por isso saíram o índice de envelhecimento (redundante com a idade mediana), a % de pessoas brancas (complementar à % de pretos e pardos) e a % de pessoas com renda até ½ salário mínimo (redundante com a renda mediana).
+- **Normalização por tipo:** `P` (percentual) é dividido por 100, `L` (cauda longa) recebe log e `Z` fica como está. Todos são padronizados em z-score em seguida.
+
+| Domínio | Métricas |
+|---|---|
+| D1 Estrutura etária e população | idade mediana, razão de sexo, crescimento 2010–2022, densidade, % urbana, moradores por domicílio |
+| D2 Composição étnico-racial | % preta e parda, % indígena, % quilombola |
+| D3 Saúde e saneamento | % com deficiência, registro civil até 5 anos, rede de água, rede de esgoto, sem banheiro, lixo coletado |
+| D4 Moradia | % apartamentos, % alugados, adensamento, internet, máquina de lavar |
+| D5 Educação | alfabetização 15+, anos de estudo 25+, superior completo 25+, frequência escolar 0–3 e 15–17 anos |
+| D6 Trabalho e renda | nível de ocupação, desocupação, informalidade, % agropecuária, renda per capita mediana |
+| D7 Mobilidade | trabalha em outro município, deslocamento acima de 1 h, transporte coletivo, automóvel |
